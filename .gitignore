@@ -1,0 +1,34 @@
+# Dependências
+node_modules/
+*/node_modules/
+
+# Ambiente — NUNCA commitar .env
+.env
+backend/.env
+frontend/.env
+mobile/.env
+
+# Build
+dist/
+frontend/dist/
+mobile/.expo/
+mobile/dist/
+
+# Logs
+*.log
+pino.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Claude Code (configs locais)
+.claude/
+.design-engineer/
+
+# Prisma
+backend/prisma/migrations/dev.db

@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PerfilUsuario {
+  gestor
+  motoboy
+}
+
+enum StatusEntrega {
+  pendente
+  em_rota
+  concluida
+  cancelada
+}
+
+enum StatusManutencao {
+  aberta
+  aprovada
+  em_andamento
+  concluida
+  recusada
+}
+
+model Usuario {
+  id            String        @id @default(uuid())
+  nome          String
+  email         String        @unique
+  senha_hash    String
+  perfil        PerfilUsuario
+  ativo         Boolean       @default(true)
+  refresh_token String?
+  criado_em     DateTime      @default(now())
+  atualizado_em DateTime      @updatedAt
+
+  motoboy    Motoboy?
+  aprovacoes Manutencao[] @relation("AprovadoPor")
+}
+
+model Filial {
+  id            String   @id @default(uuid())
+  codigo        String   @unique // "00", "01", "02"...
+  nome          String
+  ativo         Boolean  @default(true)
+  criado_em     DateTime @default(now())
+
+  motoboys      Motoboy[]
+}
+
+model Motoboy {
+  id            String   @id @default(uuid())
+  usuario_id    String   @unique
+  usuario       Usuario  @relation(fields: [usuario_id], references: [id])
+  filial_id     String?
+  filial        Filial?  @relation(fields: [filial_id], references: [id])
+  cnh           String
+  placa_moto    String
+  modelo_moto   String
+  telefone      String
+  online        Boolean  @default(false)
+  criado_em     DateTime @default(now())
+  atualizado_em DateTime @updatedAt
+
+  entregas       Entrega[]
+  manutencoes    Manutencao[]
+  abastecimentos Abastecimento[]
+
+  @@index([filial_id])
+}
+
+model Entrega {
+  id               String        @id @default(uuid())
+  motoboy_id       String
+  motoboy          Motoboy       @relation(fields: [motoboy_id], references: [id])
+  status           StatusEntrega @default(pendente)
+  cliente_nome     String
+  cliente_telefone String?
+  endereco_origem  String
+  endereco_destino String
+  observacoes      String?
+  comprovante_url  String?
+  lat_inicio       Decimal?      @db.Decimal(10, 7)
+  lng_inicio       Decimal?      @db.Decimal(10, 7)
+  lat_entrega      Decimal?      @db.Decimal(10, 7)
+  lng_entrega      Decimal?      @db.Decimal(10, 7)
+  distancia_km     Decimal?      @db.Decimal(8, 3)
+  iniciada_em      DateTime?
+  concluida_em     DateTime?
+  criado_em        DateTime      @default(now())
+  atualizado_em    DateTime      @updatedAt
+
+  @@index([motoboy_id])
+  @@index([status])
+  @@index([criado_em])
+}
+
+model Manutencao {
+  id              String           @id @default(uuid())
+  motoboy_id      String
+  motoboy         Motoboy          @relation(fields: [motoboy_id], references: [id])
+  tipo            String
+  descricao       String
+  status          StatusManutencao @default(aberta)
+  aprovado_por_id String?
+  aprovado_por    Usuario?         @relation("AprovadoPor", fields: [aprovado_por_id], references: [id])
+  aprovado_em     DateTime?
+  concluida_em    DateTime?
+  criado_em       DateTime         @default(now())
+  atualizado_em   DateTime         @updatedAt
+
+  @@index([motoboy_id])
+  @@index([status])
+}
+
+model Abastecimento {
+  id            String   @id @default(uuid())
+  motoboy_id    String
+  motoboy       Motoboy  @relation(fields: [motoboy_id], references: [id])
+  litros        Decimal  @db.Decimal(6, 2)
+  valor_total   Decimal  @db.Decimal(10, 2)
+  quilometragem Int
+  posto         String?
+  criado_em     DateTime @default(now())
+  atualizado_em DateTime @updatedAt
+
+  @@index([motoboy_id])
+  @@index([criado_em])
+}
