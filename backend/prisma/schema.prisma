@@ -9,6 +9,7 @@ datasource db {
 }
 
 enum PerfilUsuario {
+  admin
   gestor
   motoboy
 }
@@ -28,8 +29,21 @@ enum StatusManutencao {
   recusada
 }
 
+model Empresa {
+  id        String   @id @default(uuid())
+  nome      String
+  cnpj      String?
+  ativo     Boolean  @default(true)
+  criado_em DateTime @default(now())
+
+  usuarios Usuario[]
+  filiais  Filial[]
+}
+
 model Usuario {
   id            String        @id @default(uuid())
+  empresa_id    String?
+  empresa       Empresa?      @relation(fields: [empresa_id], references: [id])
   nome          String
   email         String        @unique
   senha_hash    String
@@ -41,16 +55,22 @@ model Usuario {
 
   motoboy    Motoboy?
   aprovacoes Manutencao[] @relation("AprovadoPor")
+
+  @@index([empresa_id])
 }
 
 model Filial {
-  id            String   @id @default(uuid())
-  codigo        String   @unique // "00", "01", "02"...
-  nome          String
-  ativo         Boolean  @default(true)
-  criado_em     DateTime @default(now())
+  id         String   @id @default(uuid())
+  empresa_id String?
+  empresa    Empresa? @relation(fields: [empresa_id], references: [id])
+  codigo     String
+  nome       String
+  ativo      Boolean  @default(true)
+  criado_em  DateTime @default(now())
 
-  motoboys      Motoboy[]
+  motoboys Motoboy[]
+
+  @@index([empresa_id])
 }
 
 model Motoboy {

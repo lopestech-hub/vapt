@@ -30,7 +30,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const tokens = await this.gerarTokens(usuario.id, usuario.email, usuario.perfil);
+    const tokens = await this.gerarTokens(usuario.id, usuario.email, usuario.perfil, usuario.empresa_id);
     await this.salvarRefreshToken(usuario.id, tokens.refresh_token);
 
     return {
@@ -41,13 +41,14 @@ export class AuthService {
         nome: usuario.nome,
         email: usuario.email,
         perfil: usuario.perfil,
+        empresa_id: usuario.empresa_id,
         motoboy_id: usuario.motoboy?.id ?? null,
       },
     };
   }
 
   async refresh(usuarioId: string, email: string, perfil: string) {
-    const tokens = await this.gerarTokens(usuarioId, email, perfil);
+    const tokens = await this.gerarTokens(usuarioId, email, perfil, null);
     await this.salvarRefreshToken(usuarioId, tokens.refresh_token);
     return tokens;
   }
@@ -59,8 +60,8 @@ export class AuthService {
     });
   }
 
-  private async gerarTokens(usuarioId: string, email: string, perfil: string) {
-    const payload = { sub: usuarioId, email, perfil };
+  private async gerarTokens(usuarioId: string, email: string, perfil: string, empresaId: string | null) {
+    const payload = { sub: usuarioId, email, perfil, empresa_id: empresaId };
 
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {

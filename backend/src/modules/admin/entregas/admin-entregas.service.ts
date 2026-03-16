@@ -52,8 +52,9 @@ export class AdminEntregasService {
     };
   }
 
-  async listar(status?: string) {
-    const where = status ? { status: status as any } : {};
+  async listar(empresaId: string, status?: string) {
+    const where: any = { motoboy: { usuario: { empresa_id: empresaId } } };
+    if (status) where.status = status;
     const entregas = await this.prisma.entrega.findMany({
       where,
       include: {
@@ -64,17 +65,19 @@ export class AdminEntregasService {
     return entregas.map((e) => this.transformar(e));
   }
 
-  async buscarPorId(id: string) {
-    const e = await this.prisma.entrega.findUnique({
-      where: { id },
+  async buscarPorId(id: string, empresaId: string) {
+    const e = await this.prisma.entrega.findFirst({
+      where: { id, motoboy: { usuario: { empresa_id: empresaId } } },
       include: { motoboy: { include: { usuario: { select: { nome: true } } } } },
     });
     if (!e) throw new NotFoundException('Entrega não encontrada.');
     return this.transformar(e);
   }
 
-  async criar(dto: CriarEntregaDto) {
-    const motoboy = await this.prisma.motoboy.findUnique({ where: { id: dto.motoboy_id } });
+  async criar(dto: CriarEntregaDto, empresaId: string) {
+    const motoboy = await this.prisma.motoboy.findFirst({
+      where: { id: dto.motoboy_id, usuario: { empresa_id: empresaId } },
+    });
     if (!motoboy) throw new NotFoundException('Motoboy não encontrado.');
 
     const entrega = await this.prisma.entrega.create({
@@ -99,8 +102,10 @@ export class AdminEntregasService {
     return this.transformar(entrega);
   }
 
-  async cancelar(id: string) {
-    const e = await this.prisma.entrega.findUnique({ where: { id } });
+  async cancelar(id: string, empresaId: string) {
+    const e = await this.prisma.entrega.findFirst({
+      where: { id, motoboy: { usuario: { empresa_id: empresaId } } },
+    });
     if (!e) throw new NotFoundException('Entrega não encontrada.');
 
     const atualizada = await this.prisma.entrega.update({

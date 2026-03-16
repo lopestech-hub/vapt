@@ -16,6 +16,9 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
+    // Admin tem acesso a tudo (exceto rotas exclusivas de motoboy)
+    if (user.perfil === 'admin' && !perfisPermitidos.includes('motoboy')) return true;
+
     if (!perfisPermitidos.includes(user.perfil)) {
       throw new ForbiddenException('Acesso não autorizado para este perfil');
     }

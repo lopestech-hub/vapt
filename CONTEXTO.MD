@@ -362,21 +362,61 @@ MINIO_BUCKET=mototrack
 - Etapa 9 (Envs): 15 variáveis mapeadas
 - Etapa 10 (Roadmap): 8 fases definidas
 
+## 🌐 Infraestrutura de Produção
+- **Repositório GitHub:** `https://github.com/lopestech-hub/vapt.git` (privado)
+- **Backend + Frontend (produção):** `https://applications-vapt-api.tbs25p.easypanel.host`
+- **EasyPanel:** projeto `applications`, serviço `vapt-api`, porta `3000`
+- **Banco PostgreSQL:** `easypanel.lopestechhub.com.br:4132/db-vapt`
+- **Mobile BASE_URL:** `https://applications-vapt-api.tbs25p.easypanel.host/api`
+- **App mobile:** nome `VAPT Motoboy`, slug `vapt-motoboy`, package `com.lopestech.vapt`
+
+## 🔑 Decisões Técnicas Implementadas
+- Login mobile: PIN de 4 dígitos (não senha texto) — `MinLength(4) MaxLength(6)`
+- Sessão persistente: refresh token 30 dias no AsyncStorage do mobile
+- Auto-refresh Axios: interceptor com fila para requisições concorrentes (sem loop 401)
+- Filiais: 6 unidades cadastradas (00-Petrolina, 01-Juazeiro, 02-Salgueiro, 04-CD, 05-Bonfim, 06-Picos)
+- GPS: captura pontual no início da entrega + no momento da foto (não contínuo)
+- Distância: fórmula Haversine entre `lat_inicio/lng_inicio` e `lat_entrega/lng_entrega`
+- WebSocket rastreamento: gestor seleciona motoboy específico → recebe updates a cada 60s
+- Frontend em produção: servido como estático pelo próprio backend (`/app/public`)
+- Vite dev proxy: `/api` e `/socket.io` redirecionados para `localhost:3000`
+
 ## ⚠️ Problemas Conhecidos
-_Nenhum — projeto em fase de planejamento_
+- MinIO não configurado na VPS → fotos de comprovante desabilitadas temporariamente
+- Frontend: `window.location.href = '/login'` no interceptor 401 pode causar loop em rotas públicas (baixo risco por ora)
 
 ## 📅 Última Sessão — O que foi feito e testado
-- Planejamento completo das 12 etapas realizado
-- Stack definida e validada
-- Prisma Schema completo criado
-- Rotas da API mapeadas (22 HTTP + 4 WebSocket)
-- CONTEXTO.MD criado
+- Sistema completo implementado: backend NestJS + frontend React + mobile Expo SDK 54
+- Módulos implementados: Auth, Admin (motoboys + entregas + dashboard), Entregas (motoboy), Localização (WebSocket)
+- Filiais: migration criada e 6 filiais seedadas no banco
+- Login mobile refatorado: PIN 4 dígitos com teclado numérico customizado
+- Deploy no EasyPanel configurado e funcional
+- Correções de build aplicadas:
+  - `npm ci --legacy-peer-deps` no frontend (Vite 8 vs @tailwindcss/vite)
+  - TypeScript: removidos imports não usados (`X` em Layout.tsx, `errors` em MotoboysPage.tsx)
+  - Dockerfile CMD: `dist/main.js` → `dist/src/main.js` (NestJS sourceRoot: src)
+  - Prisma: `binaryTargets = linux-musl-openssl-3.0.x` + `apk add openssl` + `prisma generate` na imagem final
+  - main.ts: path dos estáticos `join(__dirname, '..', '..', 'public')` (dois níveis acima de dist/src)
+- Backend e frontend deployados e respondendo na URL de produção
 
 ## ➡️ Próximos Passos
-1. Criar estrutura de pastas do monorepo (`frontend/`, `mobile/`, `backend/`)
-2. Inicializar projetos: `npm create vite@latest frontend`, `npx create-nest backend`, `npx create-expo-app mobile`
-3. Configurar Prisma e banco na VPS
-4. Implementar Fase 1: Auth + setup de segurança + version.json
+1. Aguardar novo deploy com fix do path dos estáticos (`4de6fa1`) — frontend deve aparecer em `/`
+2. Testar login do gestor no dashboard web em produção
+3. Gerar APK do mobile via EAS Build:
+   ```bash
+   cd mobile
+   npm install -g eas-cli
+   eas login
+   eas build:configure
+   eas build -p android --profile preview
+   ```
+4. Configurar MinIO na VPS (via EasyPanel) para habilitar fotos de comprovante
+5. Criar usuário gestor em produção (se ainda não existir no banco)
 
 ## 📅 Histórico de Mudanças
 - **2026-03-12:** Planejamento inicial criado — projeto MotoTrack
+- **2026-03-16:** Sistema completo implementado e deployado no EasyPanel
+  - Backend + frontend em produção: `applications-vapt-api.tbs25p.easypanel.host`
+  - Repositório: `github.com/lopestech-hub/vapt`
+  - 6 filiais seedadas, login PIN mobile, WebSocket rastreamento, distância Haversine
+  - Múltiplas correções de build Dockerfile resolvidas

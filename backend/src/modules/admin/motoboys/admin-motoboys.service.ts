@@ -1,5 +1,5 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { IsString, IsEmail, IsOptional, MinLength, MaxLength, IsNumberString } from 'class-validator';
+import { IsString, IsEmail, IsOptional, MinLength, MaxLength } from 'class-validator';
 import { PrismaService } from '../../../config/prisma.service';
 import * as bcrypt from 'bcryptjs';
 
@@ -36,16 +36,17 @@ export class CriarMotoboyDto {
 export class AdminMotoboysService {
   constructor(private prisma: PrismaService) {}
 
-  async listarFiliais() {
+  async listarFiliais(empresaId: string) {
     return this.prisma.filial.findMany({
-      where: { ativo: true },
+      where: { empresa_id: empresaId, ativo: true },
       orderBy: { codigo: 'asc' },
       select: { id: true, codigo: true, nome: true },
     });
   }
 
-  async listar() {
+  async listar(empresaId: string) {
     const motoboys = await this.prisma.motoboy.findMany({
+      where: { usuario: { empresa_id: empresaId } },
       include: {
         usuario: { select: { id: true, nome: true, email: true, ativo: true } },
         filial: { select: { id: true, codigo: true, nome: true } },
@@ -70,9 +71,9 @@ export class AdminMotoboysService {
     }));
   }
 
-  async buscarPorId(id: string) {
-    const m = await this.prisma.motoboy.findUnique({
-      where: { id },
+  async buscarPorId(id: string, empresaId: string) {
+    const m = await this.prisma.motoboy.findFirst({
+      where: { id, usuario: { empresa_id: empresaId } },
       include: {
         usuario: { select: { id: true, nome: true, email: true, ativo: true } },
         _count: { select: { entregas: true } },
@@ -94,7 +95,7 @@ export class AdminMotoboysService {
     };
   }
 
-  async criar(dto: CriarMotoboyDto) {
+  async criar(dto: CriarMotoboyDto, empresaId: string) {
     const existe = await this.prisma.usuario.findUnique({ where: { email: dto.email } });
     if (existe) throw new ConflictException('E-mail já cadastrado.');
 
@@ -106,6 +107,7 @@ export class AdminMotoboysService {
         email: dto.email,
         senha_hash: senhaHash,
         perfil: 'motoboy',
+        empresa_id: empresaId,
         motoboy: {
           create: {
             cnh: dto.cnh,
@@ -122,9 +124,9 @@ export class AdminMotoboysService {
     return { id: usuario.motoboy!.id, nome: usuario.nome, email: usuario.email };
   }
 
-  async toggleAtivo(id: string) {
-    const m = await this.prisma.motoboy.findUnique({
-      where: { id },
+  async toggleAtivo(id: string, empresaId: string) {
+    const m = await this.prisma.motoboy.findFirst({
+      where: { id, usuario: { empresa_id: empresaId } },
       include: { usuario: true },
     });
     if (!m) throw new NotFoundException('Motoboy não encontrado.');

@@ -3,8 +3,10 @@ import { api } from '../services/api';
 
 interface Usuario {
   id: string;
+  nome: string;
   email: string;
   perfil: string;
+  empresa_id: string | null;
 }
 
 interface AuthState {

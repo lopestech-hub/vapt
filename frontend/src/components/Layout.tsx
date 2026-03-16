@@ -1,18 +1,27 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, Users, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, Truck, Users, LogOut, Menu, Building2, UserCog } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-
-const nav = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/entregas', icon: Truck, label: 'Entregas' },
-  { to: '/motoboys', icon: Users, label: 'Motoboys' },
-];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [aberto, setAberto] = useState(false);
   const logout = useAuthStore((s) => s.logout);
+  const usuario = useAuthStore((s) => s.usuario);
   const navigate = useNavigate();
+  const isAdmin = usuario?.perfil === 'admin';
+
+  const navBase = [
+    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/entregas', icon: Truck, label: 'Entregas' },
+    { to: '/motoboys', icon: Users, label: 'Motoboys' },
+  ];
+
+  const navAdmin = [
+    { to: '/gestores', icon: UserCog, label: 'Gestores' },
+    { to: '/filiais', icon: Building2, label: 'Filiais' },
+  ];
+
+  const nav = isAdmin ? [...navBase, ...navAdmin] : navBase;
 
   function handleLogout() {
     logout();
@@ -21,12 +30,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-900 flex">
-      {/* Overlay mobile */}
       {aberto && (
         <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setAberto(false)} />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-30 w-60 bg-slate-800 border-r border-slate-700 flex flex-col transition-transform duration-200 ${
           aberto ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -62,8 +69,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        {/* Sair */}
-        <div className="px-3 pb-4">
+        {/* Info usuário + Sair */}
+        <div className="px-3 pb-4 flex flex-col gap-1">
+          {isAdmin && (
+            <div className="px-3 py-2 mb-1 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <p className="text-xs font-semibold text-orange-400 uppercase tracking-wide">Admin</p>
+              <p className="text-xs text-slate-400 truncate">{usuario?.nome}</p>
+            </div>
+          )}
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-700 hover:text-slate-100 transition-colors cursor-pointer"
@@ -74,9 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header mobile */}
         <header className="h-16 bg-slate-800 border-b border-slate-700 flex items-center px-4 lg:hidden">
           <button
             onClick={() => setAberto(true)}

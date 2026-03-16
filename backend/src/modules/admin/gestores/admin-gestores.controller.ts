@@ -3,31 +3,21 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { UsuarioAtual } from '../../../common/decorators/usuario-atual.decorator';
-import { AdminMotoboysService, CriarMotoboyDto } from './admin-motoboys.service';
+import { AdminGestoresService, CriarGestorDto } from './admin-gestores.service';
 
-@Controller('admin/motoboys')
+@Controller('admin/gestores')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('gestor')
-export class AdminMotoboysController {
-  constructor(private service: AdminMotoboysService) {}
-
-  @Get('filiais')
-  listarFiliais(@UsuarioAtual('empresa_id') empresaId: string) {
-    return this.service.listarFiliais(empresaId);
-  }
+@Roles('admin')
+export class AdminGestoresController {
+  constructor(private service: AdminGestoresService) {}
 
   @Get()
   listar(@UsuarioAtual('empresa_id') empresaId: string) {
     return this.service.listar(empresaId);
   }
 
-  @Get(':id')
-  buscar(@Param('id') id: string, @UsuarioAtual('empresa_id') empresaId: string) {
-    return this.service.buscarPorId(id, empresaId);
-  }
-
   @Post()
-  criar(@Body() dto: CriarMotoboyDto, @UsuarioAtual('empresa_id') empresaId: string) {
+  criar(@Body() dto: CriarGestorDto, @UsuarioAtual('empresa_id') empresaId: string) {
     return this.service.criar(dto, empresaId);
   }
 
