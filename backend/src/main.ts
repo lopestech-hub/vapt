@@ -36,9 +36,10 @@ async function bootstrap() {
   );
 
   // Servir o frontend buildado como arquivos estáticos em produção
+  // __dirname = /app/dist/src → public está em /app/public (dois níveis acima)
   if (process.env.NODE_ENV === 'production') {
-    app.useStaticAssets(join(__dirname, '..', 'public'));
-    app.setBaseViewsDir(join(__dirname, '..', 'public'));
+    app.useStaticAssets(join(__dirname, '..', '..', 'public'));
+    app.setBaseViewsDir(join(__dirname, '..', '..', 'public'));
   }
 
   const port = process.env.PORT ?? 3000;
