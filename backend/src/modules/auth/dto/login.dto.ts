@@ -5,6 +5,6 @@ export class LoginDto {
   email: string;
 
   @IsString()
-  @MinLength(6, { message: 'Senha deve ter pelo menos 6 caracteres' })
+  @MinLength(4, { message: 'Senha deve ter pelo menos 4 caracteres' })
   senha: string;
 }
