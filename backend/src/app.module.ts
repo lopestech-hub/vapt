@@ -4,6 +4,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from './config/prisma.module';
 import { MinioModule } from './config/minio/minio.module';
+import { NotificacoesModule } from './config/notificacoes/notificacoes.module';
+import { MigracoesService } from './config/migracoes.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { EntregasModule } from './modules/entregas/entregas.module';
 import { AdminModule } from './modules/admin/admin.module';
@@ -33,12 +35,15 @@ import { LocalizacaoModule } from './modules/localizacao/localizacao.module';
     // Banco de dados (global)
     PrismaModule,
 
-    // Módulos da aplicação
+    // Módulos de infraestrutura (globais)
     MinioModule,
+    NotificacoesModule,
     AuthModule,
     EntregasModule,
     AdminModule,
     LocalizacaoModule,
   ],
+  // MigracoesService executa ALTER TABLE idempotentes no startup
+  providers: [MigracoesService],
 })
 export class AppModule {}

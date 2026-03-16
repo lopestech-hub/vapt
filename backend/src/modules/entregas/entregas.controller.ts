@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Param,
   Body,
   UseGuards,
@@ -22,6 +23,15 @@ import { EntregasService } from './entregas.service';
 @Roles('motoboy')
 export class EntregasController {
   constructor(private service: EntregasService) {}
+
+  // Salva o push token do dispositivo para notificações
+  @Patch('push-token')
+  salvarPushToken(
+    @UsuarioAtual('id') usuarioId: string,
+    @Body('token') token: string,
+  ) {
+    return this.service.salvarPushToken(usuarioId, token);
+  }
 
   // Lista todas as entregas do motoboy autenticado
   @Get('minhas')

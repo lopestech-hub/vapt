@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
 
 import { useAuthStore } from '../store/authStore';
 import { cores } from '../theme';
+import { registrarPushToken } from '../services/notificacoes';
 
 import { LoginScreen } from '../screens/LoginScreen';
 import { EntregasScreen } from '../screens/EntregasScreen';
@@ -80,8 +82,31 @@ export function Navegacao() {
   const usuario = useAuthStore((s) => s.usuario);
   const carregando = useAuthStore((s) => s.carregando);
   const carregarSessao = useAuthStore((s) => s.carregarSessao);
+  const listenerRef = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => { carregarSessao(); }, [carregarSessao]);
+
+  // Registra push token e listener ao fazer login
+  useEffect(() => {
+    if (!usuario) {
+      listenerRef.current?.remove();
+      listenerRef.current = null;
+      return;
+    }
+
+    registrarPushToken();
+
+    // Ouve notificações com app em foreground
+    listenerRef.current = Notifications.addNotificationReceivedListener(() => {
+      // A notificação já aparece automaticamente via setNotificationHandler
+      // Aqui podemos futuramente atualizar a lista de entregas
+    });
+
+    return () => {
+      listenerRef.current?.remove();
+      listenerRef.current = null;
+    };
+  }, [usuario]);
 
   if (carregando) {
     return (

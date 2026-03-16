@@ -26,6 +26,13 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "56ad79aa-69bb-47ae-a012-9f7f877a759a"
+      }
+    },
+    "plugins": ["expo-notifications"],
+    "owner": "juliolopes-dev"
   }
 }

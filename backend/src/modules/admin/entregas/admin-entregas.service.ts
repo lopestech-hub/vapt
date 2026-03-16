@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IsString, IsOptional, IsUUID } from 'class-validator';
 import { PrismaService } from '../../../config/prisma.service';
+import { NotificacoesService } from '../../../config/notificacoes/notificacoes.service';
 
 export class CriarEntregaDto {
   @IsUUID()
@@ -26,7 +27,10 @@ export class CriarEntregaDto {
 
 @Injectable()
 export class AdminEntregasService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificacoes: NotificacoesService,
+  ) {}
 
   private transformar(e: any) {
     return {
@@ -84,6 +88,13 @@ export class AdminEntregasService {
       },
       include: { motoboy: { include: { usuario: { select: { nome: true } } } } },
     });
+
+    // Notifica o motoboy sobre a nova entrega (melhor-esforço)
+    await this.notificacoes.enviarParaMotoboy(
+      motoboy.push_token ?? null,
+      'Nova entrega!',
+      `${dto.cliente_nome} — ${dto.endereco_destino}`,
+    );
 
     return this.transformar(entrega);
   }

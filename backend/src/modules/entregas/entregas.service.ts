@@ -56,6 +56,14 @@ export class EntregasService {
     };
   }
 
+  async salvarPushToken(usuarioId: string, token: string) {
+    const motoboy = await this.buscarMotoboy(usuarioId);
+    await this.prisma.motoboy.update({
+      where: { id: motoboy.id },
+      data: { push_token: token },
+    });
+  }
+
   async minhasEntregas(usuarioId: string) {
     const motoboy = await this.buscarMotoboy(usuarioId);
     const entregas = await this.prisma.entrega.findMany({

@@ -64,6 +64,7 @@ model Motoboy {
   modelo_moto   String
   telefone      String
   online        Boolean  @default(false)
+  push_token    String?
   criado_em     DateTime @default(now())
   atualizado_em DateTime @updatedAt
 
