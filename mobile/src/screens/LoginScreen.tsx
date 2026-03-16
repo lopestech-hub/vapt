@@ -52,7 +52,7 @@ export function LoginScreen() {
       <View style={s.logo}>
         <Ionicons name="bicycle" size={40} color={cores.acento} />
       </View>
-      <Text style={s.titulo}>MotoTrack</Text>
+      <Text style={s.titulo}>VAPT</Text>
     </View>
   );
 

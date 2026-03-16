@@ -37,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
             <Truck size={16} className="text-white" />
           </div>
-          <span className="text-white font-bold text-lg">MotoTrack</span>
+          <span className="text-white font-bold text-lg">VAPT</span>
         </div>
 
         {/* Links */}
@@ -84,7 +84,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           >
             <Menu size={22} />
           </button>
-          <span className="ml-3 text-white font-semibold">MotoTrack</span>
+          <span className="ml-3 text-white font-semibold">VAPT</span>
         </header>
 
         <main className="flex-1 p-6 overflow-auto">{children}</main>

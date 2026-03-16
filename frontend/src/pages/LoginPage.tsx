@@ -35,7 +35,7 @@ export function LoginPage() {
           <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center mb-4">
             <Truck size={28} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">MotoTrack</h1>
+          <h1 className="text-2xl font-bold text-white">VAPT</h1>
           <p className="text-slate-400 text-sm mt-1">Painel de Gestão</p>
         </div>
 
