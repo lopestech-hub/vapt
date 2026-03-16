@@ -207,11 +207,13 @@ export function MotoboysPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Senha *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">PIN (4 dígitos) *</label>
                   <input
-                    {...register('senha', { required: true })}
+                    {...register('senha', { required: true, minLength: 4, maxLength: 4, pattern: /^\d{4}$/ })}
                     type="password"
-                    placeholder="Senha inicial"
+                    placeholder="4 dígitos numéricos"
+                    maxLength={4}
+                    inputMode="numeric"
                     className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm"
                   />
                 </div>

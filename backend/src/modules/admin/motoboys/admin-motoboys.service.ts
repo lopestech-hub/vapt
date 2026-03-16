@@ -12,7 +12,7 @@ export class CriarMotoboyDto {
 
   @IsString()
   @MinLength(4)
-  @MaxLength(6)
+  @MaxLength(4)
   senha: string;
 
   @IsString()
