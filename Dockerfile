@@ -21,11 +21,17 @@ FROM node:20-alpine
 ENV TZ=America/Sao_Paulo
 WORKDIR /app
 
+# OpenSSL necessário para o Prisma engine no Alpine
+RUN apk add --no-cache openssl
+
 # Copia artefatos do backend
 COPY --from=backend-builder /app/backend/dist ./dist
 COPY --from=backend-builder /app/backend/node_modules ./node_modules
 COPY --from=backend-builder /app/backend/package.json ./
 COPY --from=backend-builder /app/backend/prisma ./prisma
+
+# Regenera o Prisma client com o binary correto para este ambiente
+RUN npx prisma generate
 
 # Frontend buildado servido como estático pelo backend
 COPY --from=frontend-builder /app/frontend/dist ./public
