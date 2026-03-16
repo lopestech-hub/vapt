@@ -1,9 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Para celular físico: troque pelo IP do seu PC na rede Wi-Fi (ex: 192.168.1.100)
-// Para emulador Android: use 10.0.2.2
-const BASE_URL = 'http://192.168.12.192:3000/api';
+const BASE_URL = 'https://applications-vapt-api.tbs25p.easypanel.host/api';
 
 export const api = axios.create({ baseURL: BASE_URL, timeout: 15000 });
 

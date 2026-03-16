@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+// Em produção, o frontend é servido pelo backend (mesma origem)
+// Em dev, o Vite proxy redireciona /api → localhost:3000
 export const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: '/api',
 });
 
 // Injeta o token em todas as requisições

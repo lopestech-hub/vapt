@@ -1,6 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 
-const BASE_URL = 'http://localhost:3000';
+// Usa origem atual — funciona em dev (via proxy Vite) e em produção
+const BASE_URL = window.location.origin;
 
 let socket: Socket | null = null;
 
