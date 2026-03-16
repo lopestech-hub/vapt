@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, Users, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Truck, Users, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 

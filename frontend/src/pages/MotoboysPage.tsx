@@ -45,7 +45,7 @@ export function MotoboysPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['motoboys'] }),
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, reset } = useForm<FormData>();
 
   const erroCriar = criarMutation.error as any;
 
