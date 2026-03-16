@@ -1,12 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { IsString, IsOptional, IsUUID } from 'class-validator';
 import { PrismaService } from '../../../config/prisma.service';
 
 export class CriarEntregaDto {
+  @IsUUID()
   motoboy_id: string;
+
+  @IsString()
   cliente_nome: string;
+
+  @IsString()
+  @IsOptional()
   cliente_telefone?: string;
+
+  @IsString()
   endereco_origem: string;
+
+  @IsString()
   endereco_destino: string;
+
+  @IsString()
+  @IsOptional()
   observacoes?: string;
 }
 
