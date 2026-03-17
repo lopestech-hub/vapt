@@ -10,7 +10,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!carregando && !usuario) navigate('/login');
-    if (!carregando && usuario && usuario.perfil !== 'gestor') navigate('/login');
+    if (!carregando && usuario && !['admin', 'gestor'].includes(usuario.perfil)) navigate('/login');
   }, [carregando, usuario, navigate]);
 
   if (carregando) {

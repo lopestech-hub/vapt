@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import * as Location from 'expo-location';
 
-const BASE_URL = 'http://192.168.12.192:3000';
+const BASE_URL = 'https://applications-vapt-api.tbs25p.easypanel.host';
 
 let socket: Socket | null = null;
 let intervalo: ReturnType<typeof setInterval> | null = null;
