@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ExcecaoFilter } from './common/filters/excecao.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -38,12 +39,35 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Filtro global de exceções — mensagens em português
+  app.useGlobalFilters(new ExcecaoFilter());
+
   // Validação automática de DTOs
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,       // remove campos não declarados no DTO
+      whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory: (erros) => {
+        const mensagens = erros.map((e) => {
+          const campo = e.property;
+          const restricoes = Object.values(e.constraints ?? {});
+          // Traduz mensagens técnicas do class-validator
+          const traduzidas = restricoes.map((r) => {
+            if (r.includes('should not exist')) return `Campo '${campo}' não é permitido`;
+            if (r.includes('must be a string')) return `'${campo}' deve ser um texto`;
+            if (r.includes('must be an email')) return `'${campo}' deve ser um e-mail válido`;
+            if (r.includes('must be a UUID')) return `'${campo}' deve ser um ID válido`;
+            if (r.includes('must be longer than or equal')) return `'${campo}' muito curto`;
+            if (r.includes('must be shorter than or equal')) return `'${campo}' muito longo`;
+            if (r.includes('should not be empty')) return `'${campo}' é obrigatório`;
+            if (r.includes('must be a number')) return `'${campo}' deve ser um número`;
+            return r;
+          });
+          return traduzidas.join(', ');
+        });
+        return new BadRequestException(mensagens);
+      },
     }),
   );
 
