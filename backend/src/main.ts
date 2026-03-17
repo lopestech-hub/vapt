@@ -15,7 +15,19 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   // Headers de segurança HTTP
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        mediaSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", 'wss:', 'ws:'],
+        fontSrc: ["'self'", 'https:', 'data:'],
+      },
+    },
+  }));
 
   // Prefixo global da API
   app.setGlobalPrefix('api');
