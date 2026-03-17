@@ -16,6 +16,20 @@ interface PayloadLocalizacao {
   entregaId?: string;
 }
 
+interface PontoRota {
+  lat: number;
+  lng: number;
+  atualizadoEm: Date;
+}
+
+interface DadosMotoboy {
+  pontos: PontoRota[];
+  entregaId?: string;
+}
+
+// Máximo de pontos de rota armazenados por motoboy (≈ 3h com envio a cada 1min)
+const MAX_PONTOS = 200;
+
 @WebSocketGateway({
   cors: {
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
@@ -27,8 +41,8 @@ export class LocalizacaoGateway implements OnGatewayConnection, OnGatewayDisconn
   @WebSocketServer()
   server: Server;
 
-  // Mapa: motoboyId → última localização conhecida
-  private ultimasLocalizacoes = new Map<string, { lat: number; lng: number; atualizadoEm: Date; entregaId?: string }>();
+  // Mapa: motoboyId → histórico de rota
+  private rotas = new Map<string, DadosMotoboy>();
 
   handleConnection(client: Socket) {
     console.log(`Cliente conectado: ${client.id}`);
@@ -45,22 +59,22 @@ export class LocalizacaoGateway implements OnGatewayConnection, OnGatewayDisconn
     @MessageBody() payload: PayloadLocalizacao,
   ) {
     const { motoboyId, latitude, longitude, entregaId } = payload;
+    const agora = new Date();
 
-    // Salva última localização em memória
-    this.ultimasLocalizacoes.set(motoboyId, {
-      lat: latitude,
-      lng: longitude,
-      atualizadoEm: new Date(),
-      entregaId,
-    });
+    // Adiciona ponto ao histórico de rota
+    const dados = this.rotas.get(motoboyId) ?? { pontos: [], entregaId };
+    dados.pontos.push({ lat: latitude, lng: longitude, atualizadoEm: agora });
+    if (dados.pontos.length > MAX_PONTOS) dados.pontos.shift();
+    if (entregaId) dados.entregaId = entregaId;
+    this.rotas.set(motoboyId, dados);
 
-    // Emite para gestores que estão assistindo esse motoboy
+    // Emite o novo ponto para gestores que estão assistindo
     this.server.to(`watch:${motoboyId}`).emit('localizacao_atualizada', {
       motoboyId,
       latitude,
       longitude,
       entregaId,
-      atualizadoEm: new Date(),
+      atualizadoEm: agora,
     });
   }
 
@@ -75,19 +89,18 @@ export class LocalizacaoGateway implements OnGatewayConnection, OnGatewayDisconn
     // Entra na sala desse motoboy
     await client.join(`watch:${motoboyId}`);
 
-    // Envia a última localização conhecida imediatamente
-    const ultima = this.ultimasLocalizacoes.get(motoboyId);
-    if (ultima) {
-      client.emit('localizacao_atualizada', {
+    const dados = this.rotas.get(motoboyId);
+
+    // Envia o histórico completo de rota imediatamente
+    if (dados && dados.pontos.length > 0) {
+      client.emit('historico_rota', {
         motoboyId,
-        latitude: ultima.lat,
-        longitude: ultima.lng,
-        entregaId: ultima.entregaId,
-        atualizadoEm: ultima.atualizadoEm,
+        pontos: dados.pontos,
+        entregaId: dados.entregaId,
       });
     }
 
-    return { success: true, temLocalizacao: !!ultima };
+    return { success: true, temLocalizacao: !!dados && dados.pontos.length > 0 };
   }
 
   // Gestor para de assistir

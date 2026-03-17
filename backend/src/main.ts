@@ -22,7 +22,7 @@ async function bootstrap() {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:'],
+        imgSrc: ["'self'", 'data:', 'https://*.tile.openstreetmap.org'],
         mediaSrc: ["'self'", 'data:'],
         connectSrc: ["'self'", 'wss:', 'ws:'],
         fontSrc: ["'self'", 'https:', 'data:'],
